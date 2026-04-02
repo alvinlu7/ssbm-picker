@@ -1,514 +1,562 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Melee Picker</title>
-  <meta
-    name="description"
-    content="A no-repeat Super Smash Bros. Melee character picker with cookie-based state."
-  />
-  <style>
-    :root {
-      --bg: #0f1220;
-      --panel: #171b2e;
-      --panel-2: #202743;
-      --text: #f3f6ff;
-      --muted: #b3bdd6;
-      --accent: #8ab4ff;
-      --accent-2: #b388ff;
-      --good: #7ee787;
-      --warn: #ffd866;
-      --danger: #ff7b72;
-      --shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
-      --radius: 22px;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Melee Picker</title>
+    <meta
+      name="description"
+      content="A no-repeat Super Smash Bros. Melee character picker with cookie-based state."
+    />
+    <style>
+      :root {
+        --bg: #0f1220;
+        --panel: #171b2e;
+        --panel-2: #202743;
+        --text: #f3f6ff;
+        --muted: #b3bdd6;
+        --accent: #8ab4ff;
+        --accent-2: #b388ff;
+        --good: #7ee787;
+        --warn: #ffd866;
+        --danger: #ff7b72;
+        --shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+        --radius: 22px;
+      }
 
-    * {
-      box-sizing: border-box;
-    }
+      * {
+        box-sizing: border-box;
+      }
 
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(138, 180, 255, 0.18), transparent 28%),
-        radial-gradient(circle at top right, rgba(179, 136, 255, 0.14), transparent 25%),
-        linear-gradient(180deg, #0b0e19 0%, #101426 100%);
-      min-height: 100vh;
-    }
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(138, 180, 255, 0.18),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(179, 136, 255, 0.14),
+            transparent 25%
+          ),
+          linear-gradient(180deg, #0b0e19 0%, #101426 100%);
+        min-height: 100vh;
+      }
 
-    .wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 28px 18px 48px;
-    }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 28px 18px 48px;
+      }
 
-    .hero {
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-    }
+      .hero {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(10px);
+      }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2rem, 5vw, 3.1rem);
-      line-height: 1.02;
-      letter-spacing: -0.04em;
-    }
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 5vw, 3.1rem);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+      }
 
-    .sub {
-      margin: 0;
-      color: var(--muted);
-      font-size: 1.02rem;
-      line-height: 1.6;
-      max-width: 780px;
-    }
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.02rem;
+        line-height: 1.6;
+        max-width: 780px;
+      }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.25fr 0.95fr;
-      gap: 18px;
-      margin-top: 18px;
-    }
-
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-    }
-
-    .panel-title {
-      margin: 0 0 14px;
-      font-size: 0.96rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-    }
-
-    .result {
-      min-height: 188px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 22px;
-      border-radius: 18px;
-      background:
-        radial-gradient(circle at top left, rgba(138, 180, 255, 0.18), transparent 35%),
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .eyebrow {
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-    }
-
-    .picked-name {
-      margin: 0;
-      font-size: clamp(2rem, 7vw, 4rem);
-      line-height: 0.98;
-      letter-spacing: -0.05em;
-      word-break: break-word;
-    }
-
-    .picked-meta {
-      color: var(--muted);
-      font-size: 0.98rem;
-    }
-
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    button {
-      appearance: none;
-      border: 0;
-      border-radius: 999px;
-      padding: 13px 18px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.22);
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: translateY(1px);
-    }
-
-    .primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #0b1022;
-    }
-
-    .secondary {
-      background: rgba(255,255,255,0.08);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .danger {
-      background: rgba(255, 123, 114, 0.12);
-      color: #ffd2cf;
-      border: 1px solid rgba(255, 123, 114, 0.28);
-    }
-
-    .tiny {
-      font-size: 0.92rem;
-      color: var(--muted);
-      margin-top: 14px;
-      line-height: 1.5;
-    }
-
-    .stat-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .stat {
-      border-radius: 18px;
-      padding: 16px;
-      background: var(--panel-2);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-    }
-
-    .list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .pill {
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 999px;
-      padding: 9px 12px;
-      font-size: 0.95rem;
-    }
-
-    .pill.picked {
-      opacity: 0.62;
-      text-decoration: line-through;
-    }
-
-    .footer {
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      text-align: center;
-    }
-
-    code {
-      color: #d6c8ff;
-      background: rgba(255,255,255,0.06);
-      padding: 0.12rem 0.35rem;
-      border-radius: 8px;
-    }
-
-    @media (max-width: 860px) {
       .grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1.25fr 0.95fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .card {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.045),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 20px;
+      }
+
+      .panel-title {
+        margin: 0 0 14px;
+        font-size: 0.96rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
       }
 
       .result {
-        min-height: 160px;
+        min-height: 188px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 22px;
+        border-radius: 18px;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(138, 180, 255, 0.18),
+            transparent 35%
+          ),
+          linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.04),
+            rgba(255, 255, 255, 0.02)
+          );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+
+      .picked-name {
+        margin: 0;
+        font-size: clamp(2rem, 7vw, 4rem);
+        line-height: 0.98;
+        letter-spacing: -0.05em;
+        word-break: break-word;
+      }
+
+      .picked-meta {
+        color: var(--muted);
+        font-size: 0.98rem;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      button {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 13px 18px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          opacity 0.12s ease,
+          box-shadow 0.12s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #0b1022;
+      }
+
+      .secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .danger {
+        background: rgba(255, 123, 114, 0.12);
+        color: #ffd2cf;
+        border: 1px solid rgba(255, 123, 114, 0.28);
+      }
+
+      .tiny {
+        font-size: 0.92rem;
+        color: var(--muted);
+        margin-top: 14px;
+        line-height: 1.5;
       }
 
       .stat-row {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 16px;
       }
-    }
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <section class="hero">
-      <h1>Melee Picker</h1>
-      <p class="sub">
-        A no-repeat Super Smash Bros. Melee character picker built as a single static page for GitHub Pages.
-        State is stored in browser cookies, so the current run survives refreshes without needing a backend.
-      </p>
-    </section>
 
-    <section class="grid">
-      <div class="card">
-        <div class="panel-title">Current Pick</div>
+      .stat {
+        border-radius: 18px;
+        padding: 16px;
+        background: var(--panel-2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
 
-        <div class="result" aria-live="polite">
-          <div class="eyebrow">Latest draw</div>
-          <h2 class="picked-name" id="pickedName">Press Pick</h2>
-          <div class="picked-meta" id="pickedMeta">No character has been drawn yet.</div>
-        </div>
+      .stat-label {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 8px;
+      }
 
-        <div class="button-row">
-          <button class="primary" id="pickBtn" type="button">Pick Character</button>
-          <button class="secondary" id="undoBtn" type="button">Undo Last Pick</button>
-          <button class="danger" id="resetBtn" type="button">Reset Run</button>
-        </div>
+      .stat-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
 
-        <div class="tiny">
-          Cookie storage key: <code>melee_picker_state</code>. This is per-browser, per-device.
-        </div>
+      .list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
 
-        <div class="stat-row">
-          <div class="stat">
-            <div class="stat-label">Remaining</div>
-            <div class="stat-value" id="remainingCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Picked</div>
-            <div class="stat-value" id="pickedCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Total Roster</div>
-            <div class="stat-value" id="totalCount">0</div>
-          </div>
-        </div>
-      </div>
+      .pill {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        padding: 9px 12px;
+        font-size: 0.95rem;
+      }
 
-      <div class="card">
-        <div class="panel-title">Picked This Run</div>
-        <div class="list" id="pickedList"></div>
-      </div>
-    </section>
+      .pill.picked {
+        opacity: 0.62;
+        text-decoration: line-through;
+      }
 
-    <section class="card" style="margin-top: 18px;">
-      <div class="panel-title">Remaining Characters</div>
-      <div class="list" id="remainingList"></div>
-    </section>
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        text-align: center;
+      }
 
-    <div class="footer">
-      Static-site friendly. Drop into a GitHub repo and enable GitHub Pages.
-    </div>
-  </main>
+      code {
+        color: #d6c8ff;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 0.12rem 0.35rem;
+        border-radius: 8px;
+      }
 
-  <script>
-    const ROSTER = [
-      "Bowser",
-      "Captain Falcon",
-      "Donkey Kong",
-      "Dr. Mario",
-      "Falco",
-      "Fox",
-      "Ganondorf",
-      "Ice Climbers",
-      "Jigglypuff",
-      "Kirby",
-      "Link",
-      "Luigi",
-      "Mario",
-      "Marth",
-      "Mewtwo",
-      "Mr. Game & Watch",
-      "Ness",
-      "Peach",
-      "Pichu",
-      "Pikachu",
-      "Roy",
-      "Samus",
-      "Sheik",
-      "Yoshi",
-      "Young Link",
-      "Zelda"
-    ];
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
 
-    const COOKIE_NAME = "melee_picker_state";
-    const COOKIE_DAYS = 365;
+        .result {
+          min-height: 160px;
+        }
 
-    const pickedNameEl = document.getElementById("pickedName");
-    const pickedMetaEl = document.getElementById("pickedMeta");
-    const remainingCountEl = document.getElementById("remainingCount");
-    const pickedCountEl = document.getElementById("pickedCount");
-    const totalCountEl = document.getElementById("totalCount");
-    const pickedListEl = document.getElementById("pickedList");
-    const remainingListEl = document.getElementById("remainingList");
-    const pickBtn = document.getElementById("pickBtn");
-    const undoBtn = document.getElementById("undoBtn");
-    const resetBtn = document.getElementById("resetBtn");
-
-    function makeInitialState() {
-      return {
-        remaining: [...ROSTER],
-        picked: [],
-        lastPick: null
-      };
-    }
-
-    function setCookie(name, value, days) {
-      const expires = new Date(Date.now() + days * 864e5).toUTCString();
-      document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
-    }
-
-    function getCookie(name) {
-      const prefix = `${name}=`;
-      const parts = document.cookie.split(";").map((part) => part.trim());
-      for (const part of parts) {
-        if (part.startsWith(prefix)) {
-          return decodeURIComponent(part.slice(prefix.length));
+        .stat-row {
+          grid-template-columns: 1fr;
         }
       }
-      return null;
-    }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <h1>Melee Picker</h1>
+      </section>
 
-    function saveState(state) {
-      setCookie(COOKIE_NAME, JSON.stringify(state), COOKIE_DAYS);
-    }
+      <section class="grid">
+        <div class="card">
+          <div class="panel-title">Current Pick</div>
 
-    function loadState() {
-      const raw = getCookie(COOKIE_NAME);
-      if (!raw) return makeInitialState();
+          <div class="result" aria-live="polite">
+            <div class="eyebrow">Latest draw</div>
+            <h2 class="picked-name" id="pickedName">Press Pick</h2>
+            <div class="picked-meta" id="pickedMeta">
+              No character has been drawn yet.
+            </div>
+          </div>
 
-      try {
-        const parsed = JSON.parse(raw);
-        const remaining = Array.isArray(parsed.remaining) ? parsed.remaining.filter((name) => ROSTER.includes(name)) : [];
-        const picked = Array.isArray(parsed.picked) ? parsed.picked.filter((name) => ROSTER.includes(name)) : [];
-        const dedupSeen = new Set();
-        const safePicked = [];
-        for (const name of picked) {
-          if (!dedupSeen.has(name)) {
-            safePicked.push(name);
-            dedupSeen.add(name);
+          <div class="button-row">
+            <button class="primary" id="pickBtn" type="button">
+              Pick Character
+            </button>
+            <button class="secondary" id="undoBtn" type="button">
+              Undo Last Pick
+            </button>
+            <button class="danger" id="resetBtn" type="button">
+              Reset Run
+            </button>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat">
+              <div class="stat-label">Remaining</div>
+              <div class="stat-value" id="remainingCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Picked</div>
+              <div class="stat-value" id="pickedCount">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Total Roster</div>
+              <div class="stat-value" id="totalCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="panel-title">Picked This Run</div>
+          <div class="list" id="pickedList"></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px">
+        <div class="panel-title">Remaining Characters</div>
+        <div class="list" id="remainingList"></div>
+      </section>
+
+      <div class="footer">
+        Static-site friendly. Drop into a GitHub repo and enable GitHub Pages.
+      </div>
+    </main>
+
+    <script>
+      const ROSTER = [
+        "Bowser",
+        "Captain Falcon",
+        "Donkey Kong",
+        "Dr. Mario",
+        "Falco",
+        "Fox",
+        "Ganondorf",
+        "Ice Climbers",
+        "Jigglypuff",
+        "Kirby",
+        "Link",
+        "Luigi",
+        "Mario",
+        "Marth",
+        "Mewtwo",
+        "Mr. Game & Watch",
+        "Ness",
+        "Peach",
+        "Pichu",
+        "Pikachu",
+        "Roy",
+        "Samus",
+        "Sheik",
+        "Yoshi",
+        "Young Link",
+        "Zelda",
+      ];
+
+      const COOKIE_NAME = "melee_picker_state";
+      const COOKIE_DAYS = 365;
+
+      const pickedNameEl = document.getElementById("pickedName");
+      const pickedMetaEl = document.getElementById("pickedMeta");
+      const remainingCountEl = document.getElementById("remainingCount");
+      const pickedCountEl = document.getElementById("pickedCount");
+      const totalCountEl = document.getElementById("totalCount");
+      const pickedListEl = document.getElementById("pickedList");
+      const remainingListEl = document.getElementById("remainingList");
+      const pickBtn = document.getElementById("pickBtn");
+      const undoBtn = document.getElementById("undoBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      function makeInitialState() {
+        return {
+          remaining: [...ROSTER],
+          picked: [],
+          lastPick: null,
+        };
+      }
+
+      function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+      }
+
+      function getCookie(name) {
+        const prefix = `${name}=`;
+        const parts = document.cookie.split(";").map((part) => part.trim());
+        for (const part of parts) {
+          if (part.startsWith(prefix)) {
+            return decodeURIComponent(part.slice(prefix.length));
+          }
+        }
+        return null;
+      }
+
+      function saveState(state) {
+        setCookie(COOKIE_NAME, JSON.stringify(state), COOKIE_DAYS);
+      }
+
+      function loadState() {
+        const raw = getCookie(COOKIE_NAME);
+        if (!raw) return makeInitialState();
+
+        try {
+          const parsed = JSON.parse(raw);
+          const remaining = Array.isArray(parsed.remaining)
+            ? parsed.remaining.filter((name) => ROSTER.includes(name))
+            : [];
+          const picked = Array.isArray(parsed.picked)
+            ? parsed.picked.filter((name) => ROSTER.includes(name))
+            : [];
+          const dedupSeen = new Set();
+          const safePicked = [];
+          for (const name of picked) {
+            if (!dedupSeen.has(name)) {
+              safePicked.push(name);
+              dedupSeen.add(name);
+            }
+          }
+
+          const safeRemaining = ROSTER.filter(
+            (name) => !dedupSeen.has(name) && remaining.includes(name),
+          );
+          const restoredRemaining =
+            safeRemaining.length + safePicked.length === ROSTER.length
+              ? safeRemaining
+              : ROSTER.filter((name) => !dedupSeen.has(name));
+
+          const lastPick = safePicked.includes(parsed.lastPick)
+            ? parsed.lastPick
+            : null;
+
+          return {
+            remaining: restoredRemaining,
+            picked: safePicked,
+            lastPick,
+          };
+        } catch (error) {
+          console.warn("Failed to parse cookie state, resetting.", error);
+          return makeInitialState();
+        }
+      }
+
+      function randomIndex(maxExclusive) {
+        return Math.floor(Math.random() * maxExclusive);
+      }
+
+      let state = loadState();
+      totalCountEl.textContent = String(ROSTER.length);
+
+      function render() {
+        remainingCountEl.textContent = String(state.remaining.length);
+        pickedCountEl.textContent = String(state.picked.length);
+
+        if (state.lastPick) {
+          pickedNameEl.textContent = state.lastPick;
+          pickedMetaEl.textContent =
+            state.remaining.length === 0
+              ? "Roster complete. All characters have been drawn."
+              : `${state.remaining.length} character${state.remaining.length === 1 ? "" : "s"} remaining.`;
+        } else if (state.picked.length > 0) {
+          pickedNameEl.textContent = state.picked[state.picked.length - 1];
+          pickedMetaEl.textContent = "Showing most recent prior pick.";
+        } else {
+          pickedNameEl.textContent = "Press Pick";
+          pickedMetaEl.textContent = "No character has been drawn yet.";
+        }
+
+        pickedListEl.innerHTML = "";
+        if (state.picked.length === 0) {
+          pickedListEl.innerHTML = '<span class="pill">Nobody yet</span>';
+        } else {
+          for (const name of state.picked) {
+            const pill = document.createElement("span");
+            pill.className = "pill picked";
+            pill.textContent = name;
+            pickedListEl.appendChild(pill);
           }
         }
 
-        const safeRemaining = ROSTER.filter((name) => !dedupSeen.has(name) && remaining.includes(name));
-        const restoredRemaining = safeRemaining.length + safePicked.length === ROSTER.length
-          ? safeRemaining
-          : ROSTER.filter((name) => !dedupSeen.has(name));
-
-        const lastPick = safePicked.includes(parsed.lastPick) ? parsed.lastPick : null;
-
-        return {
-          remaining: restoredRemaining,
-          picked: safePicked,
-          lastPick
-        };
-      } catch (error) {
-        console.warn("Failed to parse cookie state, resetting.", error);
-        return makeInitialState();
-      }
-    }
-
-    function randomIndex(maxExclusive) {
-      return Math.floor(Math.random() * maxExclusive);
-    }
-
-    let state = loadState();
-    totalCountEl.textContent = String(ROSTER.length);
-
-    function render() {
-      remainingCountEl.textContent = String(state.remaining.length);
-      pickedCountEl.textContent = String(state.picked.length);
-
-      if (state.lastPick) {
-        pickedNameEl.textContent = state.lastPick;
-        pickedMetaEl.textContent = state.remaining.length === 0
-          ? "Roster complete. All characters have been drawn."
-          : `${state.remaining.length} character${state.remaining.length === 1 ? "" : "s"} remaining.`;
-      } else if (state.picked.length > 0) {
-        pickedNameEl.textContent = state.picked[state.picked.length - 1];
-        pickedMetaEl.textContent = "Showing most recent prior pick.";
-      } else {
-        pickedNameEl.textContent = "Press Pick";
-        pickedMetaEl.textContent = "No character has been drawn yet.";
-      }
-
-      pickedListEl.innerHTML = "";
-      if (state.picked.length === 0) {
-        pickedListEl.innerHTML = '<span class="pill">Nobody yet</span>';
-      } else {
-        for (const name of state.picked) {
-          const pill = document.createElement("span");
-          pill.className = "pill picked";
-          pill.textContent = name;
-          pickedListEl.appendChild(pill);
+        remainingListEl.innerHTML = "";
+        if (state.remaining.length === 0) {
+          remainingListEl.innerHTML =
+            '<span class="pill">No characters remaining</span>';
+        } else {
+          for (const name of state.remaining) {
+            const pill = document.createElement("span");
+            pill.className = "pill";
+            pill.textContent = name;
+            remainingListEl.appendChild(pill);
+          }
         }
+
+        pickBtn.disabled = state.remaining.length === 0;
+        undoBtn.disabled = state.picked.length === 0;
+        saveState(state);
       }
 
-      remainingListEl.innerHTML = "";
-      if (state.remaining.length === 0) {
-        remainingListEl.innerHTML = '<span class="pill">No characters remaining</span>';
-      } else {
-        for (const name of state.remaining) {
-          const pill = document.createElement("span");
-          pill.className = "pill";
-          pill.textContent = name;
-          remainingListEl.appendChild(pill);
+      function pickCharacter() {
+        if (state.remaining.length === 0) return;
+
+        const idx = randomIndex(state.remaining.length);
+        const [choice] = state.remaining.splice(idx, 1);
+        state.picked.push(choice);
+        state.lastPick = choice;
+        render();
+      }
+
+      function undoLastPick() {
+        if (state.picked.length === 0) return;
+
+        const undone = state.picked.pop();
+        if (!state.remaining.includes(undone)) {
+          state.remaining.push(undone);
+          state.remaining.sort((a, b) => ROSTER.indexOf(a) - ROSTER.indexOf(b));
         }
+        state.lastPick =
+          state.picked.length > 0
+            ? state.picked[state.picked.length - 1]
+            : null;
+        render();
       }
 
-      pickBtn.disabled = state.remaining.length === 0;
-      undoBtn.disabled = state.picked.length === 0;
-      saveState(state);
-    }
-
-    function pickCharacter() {
-      if (state.remaining.length === 0) return;
-
-      const idx = randomIndex(state.remaining.length);
-      const [choice] = state.remaining.splice(idx, 1);
-      state.picked.push(choice);
-      state.lastPick = choice;
-      render();
-    }
-
-    function undoLastPick() {
-      if (state.picked.length === 0) return;
-
-      const undone = state.picked.pop();
-      if (!state.remaining.includes(undone)) {
-        state.remaining.push(undone);
-        state.remaining.sort((a, b) => ROSTER.indexOf(a) - ROSTER.indexOf(b));
+      function resetRun() {
+        state = makeInitialState();
+        render();
       }
-      state.lastPick = state.picked.length > 0 ? state.picked[state.picked.length - 1] : null;
+
+      pickBtn.addEventListener("click", pickCharacter);
+      undoBtn.addEventListener("click", undoLastPick);
+      resetBtn.addEventListener("click", resetRun);
+
       render();
-    }
-
-    function resetRun() {
-      state = makeInitialState();
-      render();
-    }
-
-    pickBtn.addEventListener("click", pickCharacter);
-    undoBtn.addEventListener("click", undoLastPick);
-    resetBtn.addEventListener("click", resetRun);
-
-    render();
-  </script>
-</body>
+    </script>
+  </body>
 </html>
